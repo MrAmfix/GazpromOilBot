@@ -1,9 +1,6 @@
 import uuid
-from ipaddress import NetmaskValueError
 from typing import List, Optional
-
-from alembic.util import not_none
-from sqlalchemy import String, DateTime, Boolean, Text, ForeignKey, UniqueConstraint, Enum, Integer, nulls_first
+from sqlalchemy import DateTime, Boolean, Text, ForeignKey, Enum, Integer, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncAttrs
@@ -18,6 +15,16 @@ class Base(AsyncAttrs, DeclarativeBase):
 
 class User(Base):
     __tablename__ = 'users'
+    __table_args__ = (
+        CheckConstraint(
+            "(phone IS NULL OR phone ~ '^((\\+7|7|8)[0-9]{10})$')",
+            name='valid_phone'
+        ),
+        CheckConstraint(
+            "(email IS NULL OR email ~ '^[-a-zA-Z0-9_.]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}$')",
+            name='valid_email'
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     telegram_id: Mapped[str] = mapped_column(Text, unique=True, index=True, nullable=False)
