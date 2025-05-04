@@ -103,6 +103,9 @@ class Stage(Base):
     user_stages: Mapped[List["UserStage"]] = relationship(
         'UserStage', back_populates='stage', lazy='selectin'
     )
+    users: Mapped[List["User"]] = relationship(
+        'User', back_populates='cur_stage', lazy='selectin'
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime_now_moscow)

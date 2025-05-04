@@ -16,7 +16,7 @@ urt = Router()
 
 @urt.message(Command('start'), StateFilter(None))
 async def start(msg: Message, state: FSMContext, session: AsyncSession):
-    if UserCrud.get_filtered_by_params(session=session, telegram_id=str(msg.from_user.id)):
+    if await UserCrud.get_filtered_by_params(session=session, telegram_id=str(msg.from_user.id)):
         await msg.answer('Привет, ты уже зарегистрирован 🤝')
     else:
         await UserCrud.create(session=session, telegram_id=str(msg.from_user.id))
@@ -24,8 +24,12 @@ async def start(msg: Message, state: FSMContext, session: AsyncSession):
         await state.set_state(RegistrationState.phone_request)
 
 
-@urt.message(lambda msg: msg.content_type == ContentType.CONTACT, StateFilter(RegistrationState.phone_request))
+@urt.message(StateFilter(RegistrationState.phone_request))
 async def get_phone(msg: Message, state: FSMContext, session: AsyncSession):
+    if msg.content_type != ContentType.CONTACT:
+        await msg.answer('Отправь пожалуйста телефон по кнопке')
+        return
+
     contact = msg.contact.phone_number
     if contact[0] != '+':
         contact = '+' + contact
@@ -42,16 +46,14 @@ async def get_phone(msg: Message, state: FSMContext, session: AsyncSession):
 
 @urt.message(StateFilter(RegistrationState.fullname_request))
 async def get_fullname(msg: Message, state: FSMContext, session: AsyncSession):
-    fullname = msg.text.strip()
-
-    if not msg.content_type != ContentType.TEXT or fullname or fullname.startswith('/'):
+    if msg.content_type != ContentType.TEXT or not msg.text or msg.text.startswith('/'):
         await msg.answer('Пожалуйста, отправь свое ФИО текстом.')
         return
 
     await UserCrud.update_by_telegram_id(
         session=session,
         telegram_id=msg.from_user.id,
-        full_name=fullname
+        full_name=msg.text.strip()
     )
 
     await msg.answer('Спасибо, теперь мне нужна ваша электронная почта')
@@ -60,6 +62,10 @@ async def get_fullname(msg: Message, state: FSMContext, session: AsyncSession):
 
 @urt.message(StateFilter(RegistrationState.email_request))
 async def get_email(msg: Message, state: FSMContext, session: AsyncSession):
+    if msg.content_type != ContentType.TEXT:
+        await msg.answer('Некорректный формат, введите пожалуйста почту в формате email@example.com')
+        return
+
     try:
         await UserCrud.update_by_telegram_id(
             session=session,
@@ -70,21 +76,20 @@ async def get_email(msg: Message, state: FSMContext, session: AsyncSession):
         await msg.answer('Спасибо, осталось узнать только вашу специальность, напишите ее')
         await state.set_state(RegistrationState.speciality_request)
     except IntegrityError as _ie:
+
         await msg.answer('Некорректный формат, введите пожалуйста почту в формате email@example.com')
 
 
 @urt.message(StateFilter(RegistrationState.speciality_request))
 async def get_speciality(msg: Message, state: FSMContext, session: AsyncSession):
-    speciality = msg.text.strip()
-
-    if not msg.content_type != ContentType.TEXT or speciality or speciality.startswith('/'):
+    if msg.content_type != ContentType.TEXT or not msg.text or msg.text.startswith('/'):
         await msg.answer('Пожалуйста, отправь свое специальность текстом.')
         return
 
     await UserCrud.update_by_telegram_id(
         session=session,
         telegram_id=msg.from_user.id,
-        speciality=speciality
+        speciality=msg.text.strip()
     )
 
     await msg.answer('Спасибо, теперь ты зарегистрирован! Пропиши /help, чтобы узнать больше 🔥')

@@ -13,7 +13,6 @@ services:
       - "5480:5432"
 
   tgbot:
-    # Need update
     container_name: "tgbot"
     build:
       context: .
@@ -22,7 +21,5 @@ services:
       - ./:/app
     ports:
       - "8000:8000"
-    depends_on:
-      - uraraka_database
     env_file:
       - ./.env
