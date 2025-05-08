@@ -14,8 +14,12 @@ class UserCrud(
     )
 ):
     @staticmethod
-    async def update_by_telegram_id(session: AsyncSession, telegram_id: Union[str, int], **kwargs):
+    async def update_by_telegram_id(session: AsyncSession, telegram_id: Union[str, int],
+                                    clean_kwargs: bool = True, **kwargs):
         user = await UserCrud.get_filtered_by_params(session=session, telegram_id=str(telegram_id))
         if not User:
             raise Exception(f'User with telegram_id ({telegram_id}) not found')
-        await UserCrud.update(session=session, record_id=user[0].id, **kwargs)
+        if clean_kwargs:
+            await UserCrud.update(session=session, record_id=user[0].id, **kwargs)
+        else:
+            await UserCrud.update_no_clean(session=session, record_id=user[0].id, **kwargs)

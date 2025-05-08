@@ -3,8 +3,9 @@ import uuid
 from pathlib import Path
 
 from aiogram import Router, F
-from aiogram.filters import StateFilter
+from aiogram.filters import StateFilter, Command
 from aiogram.fsm.context import FSMContext
+from aiogram.loggers import event
 from aiogram.types import CallbackQuery, FSInputFile, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +13,7 @@ from bot_src.utils.keyboards import answer_options_keyboard
 from bot_src.utils.states import InEvent
 from database.crud.event_crud import EventCrud
 from database.crud.stage_crud import StageCrud
+from database.crud.user_crud import UserCrud
 from database.schemas.system_schemas import StageGet
 
 
@@ -39,6 +41,12 @@ async def start_event_callback(call: CallbackQuery, state: FSMContext, session: 
         await call.message.answer('Упс, похоже в этом событии нет заданий')
         return
 
+    await UserCrud.update_by_telegram_id(
+        session=session,
+        telegram_id=call.from_user.id,
+        cur_event_id=event.id
+    )
+
     try:
         if event.start_sticker:
             await call.message.answer_sticker(event.start_sticker)
@@ -52,6 +60,17 @@ async def start_event_callback(call: CallbackQuery, state: FSMContext, session: 
 
     await send_start_message(stage, call.message)
 
+
+@event_rt.message(Command('stop_event'), InEvent.in_event)
+async def stop_event_handler(msg: Message, state: FSMContext, session: AsyncSession):
+    await UserCrud.update_by_telegram_id(
+        session=session,
+        telegram_id=msg.from_user.id,
+        clean_kwargs=False,
+        cur_event_id=None
+    )
+    await state.clear()
+    await msg.answer('Вы прекратили прохождение события')
 
 
 @event_rt.callback_query(F.data.startswith("ev_ans"), InEvent.in_event)
@@ -87,6 +106,12 @@ async def handle_inline_answer(call: CallbackQuery, state: FSMContext, session: 
         except Exception:
             pass
         await call.message.answer(event.end_message)
+        await UserCrud.update_by_telegram_id(
+            session=session,
+            telegram_id=call.from_user.id,
+            clean_kwargs=False,
+            cur_event_id=None
+        )
         await state.clear()
     else:
         await send_start_message(stage, call.message)
@@ -127,6 +152,12 @@ async def handle_text_answer(msg: Message, state: FSMContext, session: AsyncSess
         except Exception:
             pass
         await msg.answer(event.end_message)
+        await UserCrud.update_by_telegram_id(
+            session=session,
+            telegram_id=msg.from_user.id,
+            clean_kwargs=False,
+            cur_event_id=None
+        )
         await state.clear()
     else:
         await send_start_message(stage, msg)

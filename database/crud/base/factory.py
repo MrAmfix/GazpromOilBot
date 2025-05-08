@@ -159,6 +159,24 @@ class CrudFactory:
         return cls.get_schema.model_validate(instance)
 
     @classmethod
+    async def update_no_clean(cls, session: AsyncSession, record_id: UUID, **kwargs) -> Schema:
+        """
+        Updates an existing record.
+
+        Args:
+            session (AsyncSession): The SQLAlchemy asynchronous session.
+            record_id (UUID): The unique identifier of the record.
+            **kwargs: Fields to update.
+
+        Returns:
+            Schema: The updated record as a Pydantic model.
+        """
+        await session.execute(update(cls.base_model).where(cls.base_model.id == record_id).values(**kwargs))
+        await session.commit()
+        instance = await cls.get_by_id(session, record_id)
+        return cls.get_schema.model_validate(instance)
+
+    @classmethod
     async def delete(cls, session: AsyncSession, record_id: UUID):
         """
         Deletes a record by its ID.
