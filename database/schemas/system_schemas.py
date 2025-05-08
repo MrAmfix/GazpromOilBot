@@ -49,6 +49,7 @@ class StageCreate(BaseModel):
 
     event_number: int
     start_message: str
+    mid_message: str
     end_message: str
     expected_answer: Optional[str] = None
     answer_options: Optional[str] = None
@@ -110,5 +111,34 @@ class NewsletterLogUpdate(NewsletterLogCreate):
 
 
 class NewsletterLogGet(NewsletterLogUpdate):
+    created_at: datetime
+
+
+class OnboardingCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    start_message_unauthorized: str
+    start_message_authorized: str
+
+    phone_request: str
+    invalid_phone: str
+
+    fullname_request: str
+    invalid_fullname: str
+
+    email_request: str
+    invalid_email: str
+
+    speciality_request: str
+    invalid_speciality: str
+
+    success_registration: str
+
+
+class OnboardingUpdate(OnboardingCreate):
+    id: UUID4
+
+
+class OnboardingGet(OnboardingUpdate):
     created_at: datetime
 

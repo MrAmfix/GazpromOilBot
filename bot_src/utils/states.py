@@ -6,3 +6,7 @@ class RegistrationState(StatesGroup):
     fullname_request = State()
     email_request = State()
     speciality_request = State()
+
+
+class InEvent(StatesGroup):
+    in_event = State()

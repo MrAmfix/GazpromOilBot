@@ -57,6 +57,12 @@ class User(Base):
 
 class Event(Base):
     __tablename__ = 'events'
+    __table_args__ = (
+        CheckConstraint(
+            "char_length(named_id) <= 32 AND named_id ~ '^[a-zA-Z0-9-]+$'",
+            name='valid_named_id'
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     named_id: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
@@ -83,15 +89,13 @@ class Stage(Base):
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     event_number: Mapped[int] = mapped_column(Integer, nullable=False)
     start_message: Mapped[str] = mapped_column(Text, nullable=False)
+    mid_message: Mapped[str] = mapped_column(Text, nullable=False)
     end_message: Mapped[str] = mapped_column(Text, nullable=False)
     expected_answer: Mapped[str] = mapped_column(Text, nullable=True)
     answer_options: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     start_attach: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     end_attach: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     end_sticker: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-
-    # Пока не ясно будут ли эти поля
-    # mid_attach: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     event_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey('events.id'), nullable=False
@@ -163,6 +167,32 @@ class NewsletterLog(Base):
     newsletter: Mapped["Newsletter"] = relationship(
         'Newsletter', back_populates='newsletter_logs', lazy='selectin'
     )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=datetime_now_moscow)
+
+
+class Onboarding(Base):
+    __tablename__ = 'onboardings'
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    start_message_unauthorized: Mapped[str] = mapped_column(Text, nullable=False)
+    start_message_authorized: Mapped[str] = mapped_column(Text, nullable=False)
+
+    phone_request: Mapped[str] = mapped_column(Text, nullable=False)
+    invalid_phone: Mapped[str] = mapped_column(Text, nullable=False)
+
+    fullname_request: Mapped[str] = mapped_column(Text, nullable=False)
+    invalid_fullname: Mapped[str] = mapped_column(Text, nullable=False)
+
+    email_request: Mapped[str] = mapped_column(Text, nullable=False)
+    invalid_email: Mapped[str] = mapped_column(Text, nullable=False)
+
+    speciality_request: Mapped[str] = mapped_column(Text, nullable=False)
+    invalid_speciality: Mapped[str] = mapped_column(Text, nullable=False)
+
+    success_registration: Mapped[str] = mapped_column(Text, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=datetime_now_moscow)
