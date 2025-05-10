@@ -1,21 +1,19 @@
 import os
-import uuid
 from pathlib import Path
-
 from aiogram import Router, F
+from aiogram.enums import ContentType
 from aiogram.filters import StateFilter, Command
 from aiogram.fsm.context import FSMContext
-from aiogram.loggers import event
 from aiogram.types import CallbackQuery, FSInputFile, Message
 from sqlalchemy.ext.asyncio import AsyncSession
-
 from bot_src.utils.keyboards import answer_options_keyboard
 from bot_src.utils.states import InEvent
 from database.crud.event_crud import EventCrud
 from database.crud.stage_crud import StageCrud
 from database.crud.user_crud import UserCrud
-from database.schemas.system_schemas import StageGet
-
+from database.crud.user_stage_crud import UserStageCrud
+from database.schemas.system_schemas import StageGet, UserStageCreate
+from database.utils.moscow_datetime import datetime_now_moscow
 
 event_rt = Router()
 PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
@@ -41,10 +39,16 @@ async def start_event_callback(call: CallbackQuery, state: FSMContext, session: 
         await call.message.answer('Упс, похоже в этом событии нет заданий')
         return
 
-    await UserCrud.update_by_telegram_id(
+    user = await UserCrud.update_by_telegram_id(
         session=session,
         telegram_id=call.from_user.id,
         cur_event_id=event.id
+    )
+
+    await UserStageCrud.create(
+        session=session,
+        user_id=user.id,
+        stage_id=stage.id
     )
 
     try:
@@ -63,12 +67,30 @@ async def start_event_callback(call: CallbackQuery, state: FSMContext, session: 
 
 @event_rt.message(Command('stop_event'), InEvent.in_event)
 async def stop_event_handler(msg: Message, state: FSMContext, session: AsyncSession):
-    await UserCrud.update_by_telegram_id(
+    data = await state.get_data()
+    event_id = data.get("event_id")
+    number = int(data.get("number"))
+
+    prev_stage = await StageCrud.get_by_event_id_and_number(
+        session=session,
+        event_id=event_id,
+        number=number - 1
+    )
+
+    user = await UserCrud.update_by_telegram_id(
         session=session,
         telegram_id=msg.from_user.id,
         clean_kwargs=False,
         cur_event_id=None
     )
+
+    await UserStageCrud.update_by_stage_id_and_user_id(
+        session=session,
+        stage_id=prev_stage.id,
+        user_id=user.id,
+        ended_at=datetime_now_moscow()
+    )
+
     await state.clear()
     await msg.answer('Вы прекратили прохождение события')
 
@@ -91,6 +113,12 @@ async def handle_inline_answer(call: CallbackQuery, state: FSMContext, session: 
         return
 
     await send_end_message(prev_stage, call.message)
+    await UserStageCrud.update_by_stage_id_and_telegram_id(
+        session=session,
+        stage_id=prev_stage.id,
+        telegram_id=call.from_user.id,
+        ended_at=datetime_now_moscow()
+    )
 
     stage = await StageCrud.get_by_event_id_and_number(
         session=session,
@@ -115,12 +143,21 @@ async def handle_inline_answer(call: CallbackQuery, state: FSMContext, session: 
         await state.clear()
     else:
         await send_start_message(stage, call.message)
+        await UserStageCrud.create_with_telegram_id(
+            session=session,
+            stage_id=stage.id,
+            telegram_id=call.from_user.id
+        )
         await state.update_data(number=number + 1)
 
 
 
 @event_rt.message(InEvent.in_event)
 async def handle_text_answer(msg: Message, state: FSMContext, session: AsyncSession):
+    if msg.content_type != ContentType.TEXT:
+        await msg.answer('Ответьте пожалуйста текстом')
+        return
+
     data = await state.get_data()
     event_id = data.get("event_id")
     number = int(data.get("number"))
@@ -137,6 +174,12 @@ async def handle_text_answer(msg: Message, state: FSMContext, session: AsyncSess
         return
 
     await send_end_message(prev_stage, msg)
+    await UserStageCrud.update_by_stage_id_and_telegram_id(
+        session=session,
+        stage_id=prev_stage.id,
+        telegram_id=msg.from_user.id,
+        ended_at=datetime_now_moscow()
+    )
 
     stage = await StageCrud.get_by_event_id_and_number(
         session=session,
@@ -161,6 +204,11 @@ async def handle_text_answer(msg: Message, state: FSMContext, session: AsyncSess
         await state.clear()
     else:
         await send_start_message(stage, msg)
+        await UserStageCrud.create_with_telegram_id(
+            session=session,
+            stage_id=stage.id,
+            telegram_id=msg.from_user.id
+        )
         await state.update_data(number=number + 1)
 
 

@@ -76,7 +76,6 @@ class UserStageCreate(BaseModel):
 
 class UserStageUpdate(UserStageCreate):
     id: UUID4
-    answer_text: Optional[str] = None
     ended_at: Optional[datetime] = None
 
 

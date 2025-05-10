@@ -5,13 +5,14 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from bot_src.utils.filters import IsAdmin
 from bot_src.utils.keyboards import share_number_keyboard, RemoveKeyboard, start_event_keyboard
 from bot_src.utils.states import RegistrationState
 from database.crud.event_crud import EventCrud
 from database.crud.onboarding_crud import OnboardingCrud
 from database.crud.user_crud import UserCrud
-from database.utils.DefaultEnum import UserRole
 from database.utils.emv2 import emv2
+
 
 reg_rt = Router()
 
@@ -142,11 +143,7 @@ async def get_speciality(msg: Message, state: FSMContext, session: AsyncSession)
             await msg.answer(f'Событие: {event[0].name}', reply_markup=start_event_keyboard(event_name_id))
 
 
-@reg_rt.message(StateFilter(None), F.sticker)
+@reg_rt.message(StateFilter(None), F.sticker, IsAdmin())
 async def get_sticker_id(msg: Message, session: AsyncSession):
-    if not await UserCrud.get_filtered_by_params(
-        session=session, telegram_id=str(msg.from_user.id), role=UserRole.ADMIN
-    ):
-        return
     sticker_id = msg.sticker.file_id
     await msg.answer(f'{emv2("Стикер ID:")} `{sticker_id}`', parse_mode=ParseMode.MARKDOWN_V2)
