@@ -18,6 +18,7 @@ cp .env-example .env
 * POSTGRES_PASSWORD — пароль пользователя
 * POSTGRES_DB — название базы данных
 * WEB_HOST - публичный адрес веб-приложения (например: `https://bot.mysuperbot.com`)
+
 `❗️ Важно: localhost не подойдёт — Telegram требует публичный HTTPS`
 
 3. Настройте домен у [Bot Father](https://t.me/BotFather)
@@ -31,5 +32,7 @@ docker-compose up --build
 ```
 
 Контакты:
+
 ![telegram](https://t.me/favicon.ico) [Я в Telegram](https://t.me/mramfix)
+
 ![github](https://github.com/favicon.ico) [Я на GitHub](https://github.com/MrAmfix)
