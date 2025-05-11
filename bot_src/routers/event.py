@@ -16,6 +16,7 @@ from database.crud.user_stage_crud import UserStageCrud
 from database.schemas.system_schemas import StageGet, UserStageCreate
 from database.utils.moscow_datetime import datetime_now_moscow
 
+
 event_rt = Router()
 PROJECT_ROOT = Path(__file__).parent.parent.parent.resolve()
 
@@ -64,36 +65,6 @@ async def start_event_callback(call: CallbackQuery, state: FSMContext, session: 
     await state.set_state(InEvent.in_event)
 
     await send_start_message(stage, call.message)
-
-
-@event_rt.message(Command('stop_event'), InEvent.in_event)
-async def stop_event_handler(msg: Message, state: FSMContext, session: AsyncSession):
-    data = await state.get_data()
-    event_id = data.get("event_id")
-    number = int(data.get("number"))
-
-    prev_stage = await StageCrud.get_by_event_id_and_number(
-        session=session,
-        event_id=event_id,
-        number=number - 1
-    )
-
-    user = await UserCrud.update_by_telegram_id(
-        session=session,
-        telegram_id=msg.from_user.id,
-        clean_kwargs=False,
-        cur_event_id=None
-    )
-
-    await UserStageCrud.update_by_stage_id_and_user_id(
-        session=session,
-        stage_id=prev_stage.id,
-        user_id=user.id,
-        ended_at=datetime_now_moscow()
-    )
-
-    await state.clear()
-    await msg.answer('Вы прекратили прохождение события')
 
 
 @event_rt.callback_query(F.data.startswith("ev_ans"), InEvent.in_event)

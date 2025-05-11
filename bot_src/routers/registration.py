@@ -5,16 +5,66 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from bot_src.routers.event import handle_text_answer
 from bot_src.utils.filters import IsAdmin
 from bot_src.utils.keyboards import share_number_keyboard, RemoveKeyboard, start_event_keyboard
-from bot_src.utils.states import RegistrationState
+from bot_src.utils.states import RegistrationState, InEvent
 from database.crud.event_crud import EventCrud
 from database.crud.onboarding_crud import OnboardingCrud
+from database.crud.stage_crud import StageCrud
 from database.crud.user_crud import UserCrud
+from database.crud.user_stage_crud import UserStageCrud
 from database.utils.emv2 import emv2
-
+from database.utils.moscow_datetime import datetime_now_moscow
 
 reg_rt = Router()
+
+
+@reg_rt.message(Command('start'), StateFilter(InEvent.in_event))
+async def start_in_event(msg: Message, state: FSMContext, session: AsyncSession):
+    start_param = msg.text.strip().split(maxsplit=1)[1] if len(msg.text.strip().split()) > 1 else None
+    if start_param and start_param.startswith("nameid"):
+        await state.update_data(event_param=start_param)
+        data = await state.get_data()
+        event_id = data.get("event_id")
+        number = int(data.get("number"))
+
+        prev_stage = await StageCrud.get_by_event_id_and_number(
+            session=session,
+            event_id=event_id,
+            number=number - 1
+        )
+
+        user = await UserCrud.update_by_telegram_id(
+            session=session,
+            telegram_id=msg.from_user.id,
+            clean_kwargs=False,
+            cur_event_id=None
+        )
+
+        await UserStageCrud.update_by_stage_id_and_user_id(
+            session=session,
+            stage_id=prev_stage.id,
+            user_id=user.id,
+            ended_at=datetime_now_moscow()
+        )
+
+        await state.clear()
+        await msg.answer('Вы прекратили прохождение события')
+
+        event_name_id = start_param.replace("nameid", "", 1)
+
+        event = await EventCrud.get_filtered_by_params(
+            session=session,
+            named_id=event_name_id
+        )
+        if not event:
+            await msg.answer('Событие не найдено')
+        else:
+            await msg.answer(f'Событие: {event[0].name}', reply_markup=start_event_keyboard(event_name_id))
+    else:
+        await handle_text_answer(msg=msg, session=session, state=state)
 
 
 @reg_rt.message(Command('start'), StateFilter(None))
