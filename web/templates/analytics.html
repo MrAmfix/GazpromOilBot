@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Аналитика</title>
+</head>
+<body>
+    <p><a href="/dashboard">&larr; Назад в Dashboard</a></p>
+
+    <h2>Аналитика по ивенту</h2>
+    <form method="post" action="/analytics/event">
+        <label>Named ID ивента:</label><br>
+        <input type="text" name="named_id" id="named_id_field" required><br>
+        <button type="submit">Скачать Excel</button>
+    </form>
+
+    <h3>Список ивентов</h3>
+    <ul>
+        {% for event in events %}
+            <li>
+                {{ event.name }} ({{ event.named_id }}) — {{ event.created_at.strftime('%Y-%m-%d %H:%M') }}
+                <button onclick="document.getElementById('named_id_field').value='{{ event.named_id }}'">Получить статистику</button>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+    <h2>Аналитика всех пользователей</h2>
+    <form method="get" action="/analytics/users">
+        <button type="submit">Скачать Excel</button>
+    </form>
+</body>
+</html>

@@ -13,9 +13,6 @@ SessionLocal = async_sessionmaker(
 )
 
 
-async def get_session() -> Generator:
-    session: AsyncSession = SessionLocal()
-    try:
+async def get_session() -> AsyncSession:
+    async with SessionLocal() as session:
         yield session
-    finally:
-        await session.close()

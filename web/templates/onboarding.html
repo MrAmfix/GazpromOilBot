@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Управление онбордингами</title>
+</head>
+<body>
+    <p><a href="/dashboard">← Назад в Dashboard</a></p>
+
+    <h2>Добавить онбординг</h2>
+
+    {% if status == 'exists' %}
+        <p style="color: orange;">Онбординг с таким именем уже существует</p>
+    {% elif status == 'created' %}
+        <p style="color: green;">Онбординг создан</p>
+    {% elif status == 'activated' %}
+        <p style="color: green;">Онбординг активирован</p>
+    {% elif status == 'deleted' %}
+        <p style="color: green;">Онбординг удален</p>
+    {% endif %}
+
+    <form method="post" action="/onboarding/set">
+        <label>Наименование онбординга:</label><br>
+        <textarea name="name" required></textarea><br>
+
+        <label>Сообщение при запуске (неавторизованный):</label><br>
+        <textarea name="start_message_unauthorized" required></textarea><br>
+
+        <label>Сообщение при запуске (авторизованный):</label><br>
+        <textarea name="start_message_authorized" required></textarea><br>
+
+        <label>Запрос телефона:</label><br>
+        <textarea name="phone_request" required></textarea><br>
+
+        <label>Неверный телефон:</label><br>
+        <textarea name="invalid_phone" required></textarea><br>
+
+        <label>Запрос ФИО:</label><br>
+        <textarea name="fullname_request" required></textarea><br>
+
+        <label>Неверное ФИО:</label><br>
+        <textarea name="invalid_fullname" required></textarea><br>
+
+        <label>Запрос email:</label><br>
+        <textarea name="email_request" required></textarea><br>
+
+        <label>Неверный email:</label><br>
+        <textarea name="invalid_email" required></textarea><br>
+
+        <label>Запрос специальности:</label><br>
+        <textarea name="speciality_request" required></textarea><br>
+
+        <label>Неверная специальность:</label><br>
+        <textarea name="invalid_speciality" required></textarea><br>
+
+        <label>Сообщение об успешной регистрации:</label><br>
+        <textarea name="success_registration" required></textarea><br>
+
+        <button type="submit">Сохранить</button>
+    </form>
+
+    <h2>Существующие онбординги</h2>
+    <ul>
+        {% for onboarding in onboardings %}
+            <li>
+                {% if onboarding.is_active %}
+                    ✅
+                {% endif %}
+                {{ onboarding.name }}
+                {{ onboarding.created_at.strftime('%Y-%m-%d %H:%M') }}
+                <form method="post" action="/onboarding/activate" style="display:inline;">
+                    <input type="hidden" name="onboarding_id" value="{{ onboarding.id }}">
+                    <button type="submit">Активировать</button>
+                </form>
+                <form method="post" action="/onboarding/delete" style="display:inline;">
+                    <input type="hidden" name="onboarding_id" value="{{ onboarding.id }}">
+                    <button type="submit">Удалить</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

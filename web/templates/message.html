@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Рассылка</title>
+</head>
+<body>
+    <p><a href="/dashboard">&larr; Назад в Dashboard</a></p>
+
+    {% if status == 'sent_all' %}
+        <p style="color: green;">Сообщение отправлено всем пользователям. Доставлено: {{ delivered }}, Ошибки: {{ failed }}</p>
+    {% elif status == 'sent_event' %}
+        <p style="color: green;">Сообщение отправлено участникам ивента. Доставлено: {{ delivered }}, Ошибки: {{ failed }}</p>
+    {% elif status == 'event_not_found' %}
+        <p style="color: red;">Ивент не найден</p>
+    {% endif %}
+
+    <h2>Рассылка всем пользователям</h2>
+    <form method="post" action="/message/send_all">
+        <label>Сообщение:</label><br>
+        <textarea name="message" required></textarea><br>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <h2>Рассылка участникам ивента</h2>
+    <form method="post" action="/message/send_event">
+        <label>named_id ивента:</label><br>
+        <input type="text" name="named_id" id="named_id_field" required><br>
+
+        <label>Сообщение:</label><br>
+        <textarea name="message" required></textarea><br>
+
+        <button type="submit">Отправить</button>
+    </form>
+
+    <h3>Список ивентов</h3>
+    <ul>
+        {% for event in events %}
+        <li>
+            {{ event.name }} ({{ event.named_id }}) — {{ event.created_at.strftime('%Y-%m-%d %H:%M') }}
+            <button onclick="document.getElementById('named_id_field').value='{{ event.named_id }}'">Разослать</button>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

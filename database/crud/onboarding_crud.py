@@ -16,9 +16,10 @@ class OnboardingCrud(
     )
 ):
     @staticmethod
-    async def get_last_onboarding(session: AsyncSession) -> OnboardingGet:
+    async def get_active_onboarding(session: AsyncSession) -> OnboardingGet:
         default_onboarding = OnboardingGet(
             id=uuid.uuid4(),
+            name='Стандартный онбординг',
             start_message_unauthorized='Привет, давай для начала зарегистрируемся',
             start_message_authorized='Привет, ты уже зарегистрирован 🤝',
             phone_request='Отправь пожалуйста свой номер телефона',
@@ -33,10 +34,6 @@ class OnboardingCrud(
             created_at=datetime_now_moscow()
         )
 
-        result = await session.execute(
-            select(Onboarding)
-            .order_by(desc(Onboarding.created_at))
-            .limit(1)
-        )
-        onboarding = result.scalar_one_or_none()
-        return OnboardingGet.model_validate(onboarding) if onboarding else default_onboarding
+        result = await OnboardingCrud.get_filtered_by_params(session=session, is_active=True)
+
+        return result[0] if result else default_onboarding

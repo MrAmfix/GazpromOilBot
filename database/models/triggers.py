@@ -38,3 +38,58 @@ fix_event_number_on_insert_trigger = {
         """DROP FUNCTION IF EXISTS fix_event_number_on_insert;"""
     ]
 }
+
+ensure_single_active_onboarding_trigger = {
+    'upgrade': [
+        """
+        CREATE OR REPLACE FUNCTION ensure_single_active_onboarding()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            IF NEW.is_active THEN
+                UPDATE onboardings
+                SET is_active = FALSE
+                WHERE is_active = TRUE AND id <> NEW.id;
+            END IF;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+        """,
+        """
+        CREATE TRIGGER trigger_ensure_single_active_onboarding
+        BEFORE INSERT OR UPDATE ON onboardings
+        FOR EACH ROW
+        EXECUTE FUNCTION ensure_single_active_onboarding();
+        """
+    ],
+    'downgrade': [
+        """DROP TRIGGER IF EXISTS trigger_ensure_single_active_onboarding ON onboardings;""",
+        """DROP FUNCTION IF EXISTS ensure_single_active_onboarding;"""
+    ]
+}
+
+fix_event_number_on_delete_trigger = {
+    'upgrade': [
+        """
+        CREATE OR REPLACE FUNCTION fix_event_number_on_delete()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            UPDATE stages
+            SET event_number = event_number - 1
+            WHERE event_id = OLD.event_id AND event_number > OLD.event_number;
+            RETURN OLD;
+        END;
+        $$ LANGUAGE plpgsql;
+        """,
+        """
+        CREATE TRIGGER trigger_fix_event_number_on_delete
+        AFTER DELETE ON stages
+        FOR EACH ROW
+        EXECUTE FUNCTION fix_event_number_on_delete();
+        """
+    ],
+    'downgrade': [
+        """DROP TRIGGER IF EXISTS trigger_fix_event_number_on_delete ON stages;""",
+        """DROP FUNCTION IF EXISTS fix_event_number_on_delete;"""
+    ]
+}
+

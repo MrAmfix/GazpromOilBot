@@ -1,3 +1,4 @@
+import mimetypes
 import os
 from pathlib import Path
 from aiogram import Router, F
@@ -224,14 +225,22 @@ async def send_start_message(stage: StageGet, msg: Message):
     if not os.path.isfile(full_path):
         await msg.answer(stage.start_message, reply_markup=answer_options_keyboard(stage))
     else:
+        mime_type, _ = mimetypes.guess_type(full_path)
         try:
-            await msg.answer_photo(
-                photo=FSInputFile(full_path),
-                caption=stage.start_message,
-                reply_markup=answer_options_keyboard(stage)
-            )
+            if mime_type and mime_type.startswith("image/"):
+                await msg.answer_photo(
+                    photo=FSInputFile(full_path),
+                    caption=stage.start_message,
+                    reply_markup=answer_options_keyboard(stage)
+                )
+            else:
+                await msg.answer_document(
+                    document=FSInputFile(full_path),
+                    caption=stage.start_message,
+                    reply_markup=answer_options_keyboard(stage)
+                )
         except Exception:
-            pass
+            await msg.answer(stage.start_message, reply_markup=answer_options_keyboard(stage))
 
 
 async def send_end_message(stage: StageGet, msg: Message):
@@ -251,10 +260,17 @@ async def send_end_message(stage: StageGet, msg: Message):
     if not os.path.isfile(full_path):
         await msg.answer(stage.end_message)
     else:
+        mime_type, _ = mimetypes.guess_type(full_path)
         try:
-            await msg.answer_photo(
-                photo=FSInputFile(full_path),
-                caption=stage.end_message
-            )
+            if mime_type and mime_type.startswith("image/"):
+                await msg.answer_photo(
+                    photo=FSInputFile(full_path),
+                    caption=stage.end_message
+                )
+            else:
+                await msg.answer_document(
+                    document=FSInputFile(full_path),
+                    caption=stage.end_message
+                )
         except Exception:
-            pass
+            await msg.answer(stage.end_message)

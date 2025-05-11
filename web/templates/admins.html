@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Управление админами</title>
+</head>
+<body>
+    <p><a href="/dashboard">← Назад в Dashboard</a></p>
+
+    <h2>Управление администраторами</h2>
+
+    {% if status == 'success' %}
+        <p style="color: green;">Админ добавлен или обновлен</p>
+    {% elif status == 'deleted' %}
+        <p style="color: green;">Админ удалён</p>
+    {% elif status == 'error' %}
+        <p style="color: red;">Произошла ошибка</p>
+    {% elif status == 'forbidden' %}
+        <p style="color: red;">Нет прав на выполнение действия</p>
+    {% elif status == 'selfedit' %}
+        <p style="color: orange;">Нельзя редактировать самого себя</p>
+    {% endif %}
+
+    <h3>Добавить админа</h3>
+    <form method="post" action="/admins/add_admin">
+        <label>Telegram ID:</label>
+        <input type="text" name="telegram_id" required><br>
+        <label>ФИО:</label>
+        <input type="text" name="fullname" required><br>
+        <label>Роль:</label>
+        <select name="role">
+            {% for role in roles %}
+                <option value="{{ role.value }}">{{ role.name }}</option>
+            {% endfor %}
+        </select><br>
+        <button type="submit">Добавить</button>
+    </form>
+
+    <h3>Список админов</h3>
+    <ul>
+        {% for admin in admins %}
+            <li>
+                {{ admin.fullname }} ({{ admin.telegram_id }}) — {{ admin.role }}
+                <form method="post" action="/admins/delete_admin" style="display:inline;">
+                    <input type="hidden" name="target_telegram_id" value="{{ admin.telegram_id }}">
+                    <button type="submit">Удалить</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -19,7 +19,7 @@ reg_rt = Router()
 
 @reg_rt.message(Command('start'), StateFilter(None))
 async def start(msg: Message, state: FSMContext, session: AsyncSession):
-    onboarding = await OnboardingCrud.get_last_onboarding(session=session)
+    onboarding = await OnboardingCrud.get_active_onboarding(session=session)
     start_param = msg.text.strip().split(maxsplit=1)[1] if len(msg.text.strip().split()) > 1 else None
 
     if await UserCrud.get_filtered_by_params(session=session, telegram_id=str(msg.from_user.id)):
@@ -46,7 +46,7 @@ async def start(msg: Message, state: FSMContext, session: AsyncSession):
 
 @reg_rt.message(StateFilter(RegistrationState.phone_request))
 async def get_phone(msg: Message, state: FSMContext, session: AsyncSession):
-    onboarding = await OnboardingCrud.get_last_onboarding(session=session)
+    onboarding = await OnboardingCrud.get_active_onboarding(session=session)
 
     if msg.content_type != ContentType.CONTACT:
         await msg.answer(onboarding.invalid_phone)
@@ -72,7 +72,7 @@ async def get_phone(msg: Message, state: FSMContext, session: AsyncSession):
 
 @reg_rt.message(StateFilter(RegistrationState.fullname_request))
 async def get_fullname(msg: Message, state: FSMContext, session: AsyncSession):
-    onboarding = await OnboardingCrud.get_last_onboarding(session=session)
+    onboarding = await OnboardingCrud.get_active_onboarding(session=session)
 
     if msg.content_type != ContentType.TEXT or not msg.text or msg.text.startswith('/'):
         await msg.answer(onboarding.invalid_fullname)
@@ -90,7 +90,7 @@ async def get_fullname(msg: Message, state: FSMContext, session: AsyncSession):
 
 @reg_rt.message(StateFilter(RegistrationState.email_request))
 async def get_email(msg: Message, state: FSMContext, session: AsyncSession):
-    onboarding = await OnboardingCrud.get_last_onboarding(session=session)
+    onboarding = await OnboardingCrud.get_active_onboarding(session=session)
 
     if msg.content_type != ContentType.TEXT:
         await msg.answer(onboarding.invalid_email)
@@ -111,7 +111,7 @@ async def get_email(msg: Message, state: FSMContext, session: AsyncSession):
 
 @reg_rt.message(StateFilter(RegistrationState.speciality_request))
 async def get_speciality(msg: Message, state: FSMContext, session: AsyncSession):
-    onboarding = await OnboardingCrud.get_last_onboarding(session=session)
+    onboarding = await OnboardingCrud.get_active_onboarding(session=session)
 
     if msg.content_type != ContentType.TEXT or not msg.text or msg.text.startswith('/'):
         await msg.answer(onboarding.invalid_speciality)

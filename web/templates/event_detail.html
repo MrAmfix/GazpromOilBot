@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event.name }}</title>
+</head>
+<body>
+    <p><a href="/events">&larr; Назад к списку ивентов</a></p>
+
+    {% if status == 'updated' %}<p style="color: green;">Ивент обновлён</p>{% endif %}
+    {% if status == 'stage_used' %}<p style="color: red;">Кажется, стейдж уже используется, удалить не получится</p>{% endif %}
+    {% if status == 'stage_added' %}<p style="color: green;">Стейдж добавлен</p>{% endif %}
+    {% if status == 'stage_deleted' %}<p style="color: green;">Стейдж удалён</p>{% endif %}
+
+    <h2>{{ event.name }} ({{ event.named_id }})</h2>
+    <form method="post" action="/events/{{ event.id }}/update">
+        <label>Название:</label><input name="name" value="{{ event.name }}" required><br>
+        <label>Стартовое сообщение:</label><textarea name="start_message">{{ event.start_message }}</textarea><br>
+        <label>Конечное сообщение:</label><textarea name="end_message">{{ event.end_message }}</textarea><br>
+        <label>ID стартового стикера:</label><input name="start_sticker" value="{{ event.start_sticker }}"><br>
+        <label>ID конечного стикера:</label><input name="end_sticker" value="{{ event.end_sticker }}"><br>
+        <small>Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" target="_blank">боту</a></small><br>
+        <button type="submit">Сохранить</button>
+    </form>
+
+    <h3>Добавить стейдж</h3>
+    <form method="post" action="/events/{{ event.id }}/stages/add" enctype="multipart/form-data">
+        <label>Номер:</label><input type="number" name="event_number"><br>
+        <label>Сообщение:</label><textarea name="start_message"></textarea><br>
+        <label>При ошибке:</label><textarea name="mid_message"></textarea><br>
+        <label>Финальное:</label><textarea name="end_message"></textarea><br>
+        <label>Ожидаемый ответ:</label><input name="expected_answer"><br>
+        <label>Варианты (через ";"):</label><input name="answer_options"><br>
+        <label>Файл (начало):</label><input type="file" name="start_attach"><br>
+        <label>Файл (конец):</label><input type="file" name="end_attach"><br>
+        <label>Стикер в конце:</label><input name="end_sticker"><br>
+        <small>Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" target="_blank">боту</a></small><br>
+        <button type="submit">Добавить</button>
+    </form>
+
+    <h3>Стейджи</h3>
+    <ul>
+        {% for stage in stages %}
+        <li>
+            {{ stage.event_number }} — {{ stage.start_message }} — {{ stage.end_message }}
+            <form method="post" action="/stages/{{ stage.id }}/delete" style="display:inline;">
+                <input type="hidden" name="event_id" value="{{ event.id }}">
+                <button type="submit">Удалить</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

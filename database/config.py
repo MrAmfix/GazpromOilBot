@@ -6,6 +6,7 @@ load_dotenv()
 
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
+BOT_USERNAME = os.environ.get('BOT_USERNAME')
 POSTGRES_USER = os.environ.get('POSTGRES_USER')
 POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
 POSTGRES_IP = os.environ.get('POSTGRES_IP')

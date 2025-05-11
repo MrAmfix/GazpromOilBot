@@ -116,6 +116,9 @@ class NewsletterLogGet(NewsletterLogUpdate):
 class OnboardingCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    name: str
+    is_active: bool = False
+
     start_message_unauthorized: str
     start_message_authorized: str
 

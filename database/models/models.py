@@ -176,6 +176,9 @@ class Onboarding(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
+    name: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
     start_message_unauthorized: Mapped[str] = mapped_column(Text, nullable=False)
     start_message_authorized: Mapped[str] = mapped_column(Text, nullable=False)
 

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Управление ивентами</title>
+</head>
+<body>
+    <p><a href="/dashboard">&larr; Назад в Dashboard</a></p>
+
+    {% if status == 'created' %}<p style="color: green;">Ивент создан</p>{% endif %}
+    {% if status == 'deleted' %}<p style="color: green;">Ивент удалён</p>{% endif %}
+    {% if status == 'used' %}<p style="color: red;">Кажется ивент уже используется, удалить не получится (попробуйте сначала удалить все стейджи ивента)</p>{% endif %}
+    {% if status == 'notadded' %}<p style="color: orange;">Допустимые только латинские символы, цифры и -</p>{% endif %}
+    {% if status == 'exists' %}<p style="color: orange;">Ивент с таким именем уже существует</p>{% endif %}
+
+    <h2>Добавить ивент</h2>
+    <form method="post" action="/events/add">
+        <label>Краткое уникальное название ивента (до 32 символов):</label><input type="text" name="named_id" maxlength="32" required><br>
+        <label>Название:</label><input type="text" name="name" required><br>
+        <label>Стартовое сообщение:</label><textarea name="start_message" required></textarea><br>
+        <label>Конечное сообщение:</label><textarea name="end_message" required></textarea><br>
+        <label>ID стартового стикера:</label><input type="text" name="start_sticker"><br>
+        <label>ID конечного стикера:</label><input type="text" name="end_sticker"><br>
+        <small>Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" target="_blank">боту</a></small><br>
+        <button type="submit">Создать</button>
+    </form>
+
+    <h2>Список ивентов</h2>
+    <ul>
+        {% for event in events %}
+        <li>
+            {{ event.name }} ({{ event.named_id }}) — {{ event.created_at.strftime('%Y-%m-%d %H:%M') }}
+            <form method="post" action="/events/delete" style="display:inline;">
+                <input type="hidden" name="event_id" value="{{ event.id }}">
+                <button type="submit">Удалить</button>
+            </form>
+            <form method="get" action="/events/{{ event.id }}" style="display:inline;">
+                <button type="submit">Редактировать</button>
+            </form>
+            <form method="get" action="/events/{{ event.id }}/qr" style="display:inline;">
+                <button type="submit">QR-код</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
