@@ -7,7 +7,7 @@ from database.gen_session import get_session
 from database.utils.DefaultEnum import UserRole
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="web/templates")
 
 
 @router.get("/admins", response_class=HTMLResponse)

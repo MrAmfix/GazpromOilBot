@@ -10,7 +10,7 @@ from database.crud.user_crud import UserCrud
 from database.crud.event_crud import EventCrud
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="web/templates")
 
 
 @router.get("/analytics")

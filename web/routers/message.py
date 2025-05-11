@@ -14,7 +14,7 @@ from database.crud.newsletter_log_crud import NewsletterLogCrud
 
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="web/templates")
 bot = Bot(token=BOT_TOKEN)
 
 

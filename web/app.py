@@ -9,7 +9,7 @@ from routers import auth, admins, onboarding, events, message, analytics
 app = FastAPI()
 
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="web/templates")
 
 app.include_router(auth.router)
 app.include_router(admins.router)

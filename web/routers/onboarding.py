@@ -8,7 +8,7 @@ from database.crud.user_crud import UserCrud
 from database.crud.onboarding_crud import OnboardingCrud
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="web/templates")
 
 
 @router.get("/onboarding", response_class=HTMLResponse)

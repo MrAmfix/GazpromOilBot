@@ -14,7 +14,7 @@ from database.utils.link_for_qr import generate_link_for_qr
 from database.config import BOT_USERNAME
 
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="web/templates")
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 ATTACH_DIR = os.path.join(BASE_DIR, "attachs")
 
