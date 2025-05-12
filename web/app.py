@@ -32,11 +32,16 @@ async def login_page(request: Request):
 async def dashboard(request: Request):
     user_id = request.cookies.get("user_id")
     username = request.cookies.get("username", "Пользователь")
+    photo_url = request.cookies.get("photo_url", "")
 
     if not user_id:
         return RedirectResponse(url="/")
 
-    return templates.TemplateResponse("dashboard.html", {"request": request, "username": username})
+    return templates.TemplateResponse("dashboard.html", {
+        "request": request,
+        "username": username,
+        "photo_url": photo_url
+    })
 
 
 if __name__ == '__main__':

@@ -29,6 +29,7 @@ async def auth_telegram(request: Request, session: AsyncSession = Depends(get_se
 
     telegram_id = int(params.get("id"))
     username = params.get("username", "Пользователь")
+    photo_url = params.get("photo_url", "")
 
     user = await UserCrud.get_filtered_by_params(session=session, telegram_id=str(telegram_id))
     if not user or user[0].role not in (UserRole.ADMIN, UserRole.HADMIN):
@@ -37,4 +38,5 @@ async def auth_telegram(request: Request, session: AsyncSession = Depends(get_se
     response = RedirectResponse(url="/dashboard")
     response.set_cookie(key="user_id", value=str(telegram_id))
     response.set_cookie(key="username", value=username)
+    response.set_cookie(key="photo_url", value=photo_url)
     return response
