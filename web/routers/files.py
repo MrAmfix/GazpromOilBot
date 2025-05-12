@@ -11,7 +11,7 @@ ATTACH_DIR = os.path.join(BASE_DIR, "attachs")
 @router.get("/file/{filename}")
 async def get_file(filename: str, request: Request):
     client_ip = request.client.host
-    if client_ip not in ['tgbot']:
+    if not client_ip.startswith('172.'):
         raise HTTPException(status_code=403, detail="Access denied")
 
     file_path = os.path.join(ATTACH_DIR, filename)
