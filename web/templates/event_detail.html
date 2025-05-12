@@ -21,10 +21,10 @@
 
 <h3 class="text-xl font-medium mb-2">Добавить стейдж</h3>
 <form method="post" action="/events/{{ event.id }}/stages/add" enctype="multipart/form-data" class="space-y-2 mb-6">
-    <div><label>Номер:</label><input type="number" name="event_number" class="input"></div>
-    <div><label>Сообщение:</label><textarea name="start_message" class="input"></textarea></div>
-    <div><label>При ошибке:</label><textarea name="mid_message" class="input"></textarea></div>
-    <div><label>Финальное:</label><textarea name="end_message" class="input"></textarea></div>
+    <div><label>Номер:</label><input type="number" name="event_number" class="input" required></div>
+    <div><label>Сообщение:</label><textarea name="start_message" class="input" required></textarea></div>
+    <div><label>При ошибке:</label><textarea name="mid_message" class="input" required></textarea></div>
+    <div><label>Финальное:</label><textarea name="end_message" class="input" required></textarea></div>
     <div><label>Ожидаемый ответ:</label><input name="expected_answer" class="input"></div>
     <div><label>Варианты (через ";"):</label><input name="answer_options" class="input"></div>
     <div><label>Файл (начало):</label><input type="file" name="start_attach" class="input"></div>
