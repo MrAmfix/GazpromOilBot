@@ -40,7 +40,7 @@ async def view_table(table_name: str, request: Request, session: AsyncSession = 
         return RedirectResponse("/dashboard")
 
     table = Base.metadata.tables.get(table_name)
-    if not table:
+    if table is None:
         raise HTTPException(status_code=404, detail="Таблица не найдена")
 
     result = await session.execute(select(table))
