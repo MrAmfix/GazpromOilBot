@@ -13,6 +13,8 @@ services:
       - "5480:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
 
   migrate:
     container_name: "alembic_migration"
@@ -28,6 +30,8 @@ services:
       - ./.env
     depends_on:
       - postgres_db
+    networks:
+      - internal
 
   tgbot:
     container_name: "tgbot"
