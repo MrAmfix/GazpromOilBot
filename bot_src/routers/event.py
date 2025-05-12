@@ -231,9 +231,9 @@ async def send_end_message(stage: StageGet, msg: Message):
     except Exception:
         pass
 
-    filename = (stage.start_attach or "").replace("attachs/", "")
+    filename = (stage.end_attach or "").replace("attachs/", "")
     file_url = f"http://web_app:{WEB_PORT}/file/{filename}"
-    file = await download_file(file_url, "start")
+    file = await download_file(file_url, "end")
 
     if not file:
         await msg.answer(stage.end_message)
