@@ -1,17 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
-    <h2>Войти через Telegram</h2>
-    <script async src="https://telegram.org/js/telegram-widget.js?7"
-            data-telegram-login="{{ bot_username }}"
-            data-size="large"
-            data-userpic="false"
-            data-request-access="write"
-            data-auth-url="{{ web_host }}/auth/telegram"
-            data-lang="ru">
-    </script>
-</body>
-</html>
+{% extends "base.html" %}
+{% set hide_sidebar = True %}
+
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="flex flex-col items-center justify-center h-screen text-center">
+    <h2 class="text-2xl font-semibold mb-6">Войти через Telegram</h2>
+    <div class="flex justify-center">
+        <script async src="https://telegram.org/js/telegram-widget.js?7"
+                data-telegram-login="{{ bot_username }}"
+                data-size="large"
+                data-userpic="false"
+                data-request-access="write"
+                data-auth-url="{{ web_host }}/auth/telegram"
+                data-lang="ru">
+        </script>
+    </div>
+</div>
+{% endblock %}

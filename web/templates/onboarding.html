@@ -1,82 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Управление онбордингами</title>
-</head>
-<body>
-    <p><a href="/dashboard">← Назад в Dashboard</a></p>
+{% extends "base.html" %}
+{% block title %}Онбординг{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Управление онбордингами</h2>
 
-    <h2>Добавить онбординг</h2>
+{% if status %}
+    <div class="mb-4 text-sm {% if status in ['created', 'activated', 'deleted'] %}text-green-600{% else %}text-yellow-600{% endif %}">
+        {% if status == 'exists' %}Онбординг с таким именем уже существует
+        {% elif status == 'created' %}Онбординг создан
+        {% elif status == 'activated' %}Онбординг активирован
+        {% elif status == 'deleted' %}Онбординг удалён
+        {% endif %}
+    </div>
+{% endif %}
 
-    {% if status == 'exists' %}
-        <p style="color: orange;">Онбординг с таким именем уже существует</p>
-    {% elif status == 'created' %}
-        <p style="color: green;">Онбординг создан</p>
-    {% elif status == 'activated' %}
-        <p style="color: green;">Онбординг активирован</p>
-    {% elif status == 'deleted' %}
-        <p style="color: green;">Онбординг удален</p>
-    {% endif %}
+<form method="post" action="/onboarding/set" class="grid gap-3 mb-6">
+    {% for field, label in {
+        "name": "Наименование онбординга",
+        "start_message_unauthorized": "Сообщение при запуске (неавторизованный)",
+        "start_message_authorized": "Сообщение при запуске (авторизованный)",
+        "phone_request": "Запрос телефона",
+        "invalid_phone": "Неверный телефон",
+        "fullname_request": "Запрос ФИО",
+        "invalid_fullname": "Неверное ФИО",
+        "email_request": "Запрос email",
+        "invalid_email": "Неверный email",
+        "speciality_request": "Запрос специальности",
+        "invalid_speciality": "Неверная специальность",
+        "success_registration": "Сообщение об успешной регистрации"
+    }.items() %}
+    <div>
+        <label>{{ label }}:</label>
+        <textarea name="{{ field }}" required class="input"></textarea>
+    </div>
+    {% endfor %}
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Сохранить</button>
+</form>
 
-    <form method="post" action="/onboarding/set">
-        <label>Наименование онбординга:</label><br>
-        <textarea name="name" required></textarea><br>
-
-        <label>Сообщение при запуске (неавторизованный):</label><br>
-        <textarea name="start_message_unauthorized" required></textarea><br>
-
-        <label>Сообщение при запуске (авторизованный):</label><br>
-        <textarea name="start_message_authorized" required></textarea><br>
-
-        <label>Запрос телефона:</label><br>
-        <textarea name="phone_request" required></textarea><br>
-
-        <label>Неверный телефон:</label><br>
-        <textarea name="invalid_phone" required></textarea><br>
-
-        <label>Запрос ФИО:</label><br>
-        <textarea name="fullname_request" required></textarea><br>
-
-        <label>Неверное ФИО:</label><br>
-        <textarea name="invalid_fullname" required></textarea><br>
-
-        <label>Запрос email:</label><br>
-        <textarea name="email_request" required></textarea><br>
-
-        <label>Неверный email:</label><br>
-        <textarea name="invalid_email" required></textarea><br>
-
-        <label>Запрос специальности:</label><br>
-        <textarea name="speciality_request" required></textarea><br>
-
-        <label>Неверная специальность:</label><br>
-        <textarea name="invalid_speciality" required></textarea><br>
-
-        <label>Сообщение об успешной регистрации:</label><br>
-        <textarea name="success_registration" required></textarea><br>
-
-        <button type="submit">Сохранить</button>
-    </form>
-
-    <h2>Существующие онбординги</h2>
-    <ul>
-        {% for onboarding in onboardings %}
-            <li>
-                {% if onboarding.is_active %}
-                    ✅
-                {% endif %}
-                {{ onboarding.name }}
-                {{ onboarding.created_at.strftime('%Y-%m-%d %H:%M') }}
-                <form method="post" action="/onboarding/activate" style="display:inline;">
+<h3 class="text-xl font-medium mb-2">Существующие онбординги</h3>
+<table class="table-auto w-full bg-white shadow rounded">
+    <thead class="bg-gray-200 text-left">
+        <tr><th class="p-2">Активен</th><th class="p-2">Имя</th><th class="p-2">Дата</th><th class="p-2">Действия</th></tr>
+    </thead>
+    <tbody>
+    {% for onboarding in onboardings %}
+        <tr class="border-t">
+            <td class="p-2">{% if onboarding.is_active %}✅{% endif %}</td>
+            <td class="p-2">{{ onboarding.name }}</td>
+            <td class="p-2">{{ onboarding.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="p-2 space-x-2">
+                <form method="post" action="/onboarding/activate" class="inline">
                     <input type="hidden" name="onboarding_id" value="{{ onboarding.id }}">
-                    <button type="submit">Активировать</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700">Активировать</button>
                 </form>
-                <form method="post" action="/onboarding/delete" style="display:inline;">
+                <form method="post" action="/onboarding/delete" class="inline">
                     <input type="hidden" name="onboarding_id" value="{{ onboarding.id }}">
-                    <button type="submit">Удалить</button>
+                    <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Удалить</button>
                 </form>
-            </li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

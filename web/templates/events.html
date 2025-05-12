@@ -1,46 +1,50 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Управление ивентами</title>
-</head>
-<body>
-    <p><a href="/dashboard">&larr; Назад в Dashboard</a></p>
+{% extends "base.html" %}
+{% block title %}Ивенты{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Управление ивентами</h2>
 
-    {% if status == 'created' %}<p style="color: green;">Ивент создан</p>{% endif %}
-    {% if status == 'deleted' %}<p style="color: green;">Ивент удалён</p>{% endif %}
-    {% if status == 'used' %}<p style="color: red;">Кажется ивент уже используется, удалить не получится (попробуйте сначала удалить все стейджи ивента)</p>{% endif %}
-    {% if status == 'notadded' %}<p style="color: orange;">Допустимые только латинские символы, цифры и -</p>{% endif %}
-    {% if status == 'exists' %}<p style="color: orange;">Ивент с таким именем уже существует</p>{% endif %}
+{% if status %}
+    <div class="mb-4 text-sm {% if status in ['created', 'deleted'] %}text-green-600{% elif status == 'used' %}text-red-600{% else %}text-yellow-600{% endif %}">
+        {% if status == 'created' %}Ивент создан{% elif status == 'deleted' %}Ивент удалён{% elif status == 'used' %}Ивент используется, удаление невозможно{% elif status == 'notadded' %}Допустимы только латиница, цифры и "-" {% elif status == 'exists' %}Ивент с таким именем уже существует{% endif %}
+    </div>
+{% endif %}
 
-    <h2>Добавить ивент</h2>
-    <form method="post" action="/events/add">
-        <label>Краткое уникальное название ивента (до 32 символов):</label><input type="text" name="named_id" maxlength="32" required><br>
-        <label>Название:</label><input type="text" name="name" required><br>
-        <label>Стартовое сообщение:</label><textarea name="start_message" required></textarea><br>
-        <label>Конечное сообщение:</label><textarea name="end_message" required></textarea><br>
-        <label>ID стартового стикера:</label><input type="text" name="start_sticker"><br>
-        <label>ID конечного стикера:</label><input type="text" name="end_sticker"><br>
-        <small>Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" target="_blank">боту</a></small><br>
-        <button type="submit">Создать</button>
-    </form>
+<form method="post" action="/events/add" class="space-y-2 mb-6">
+    <div><label>Named ID:</label><input type="text" name="named_id" maxlength="32" class="input" required></div>
+    <div><label>Название:</label><input type="text" name="name" class="input" required></div>
+    <div><label>Стартовое сообщение:</label><textarea name="start_message" class="input" required></textarea></div>
+    <div><label>Конечное сообщение:</label><textarea name="end_message" class="input" required></textarea></div>
+    <div><label>ID стартового стикера:</label><input type="text" name="start_sticker" class="input"></div>
+    <div><label>ID конечного стикера:</label><input type="text" name="end_sticker" class="input"></div>
+    <small class="text-gray-500">Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" class="text-blue-500" target="_blank">боту</a></small><br>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Создать</button>
+</form>
 
-    <h2>Список ивентов</h2>
-    <ul>
-        {% for event in events %}
-        <li>
-            {{ event.name }} ({{ event.named_id }}) — {{ event.created_at.strftime('%Y-%m-%d %H:%M') }}
-            <form method="post" action="/events/delete" style="display:inline;">
-                <input type="hidden" name="event_id" value="{{ event.id }}">
-                <button type="submit">Удалить</button>
-            </form>
-            <form method="get" action="/events/{{ event.id }}" style="display:inline;">
-                <button type="submit">Редактировать</button>
-            </form>
-            <form method="get" action="/events/{{ event.id }}/qr" style="display:inline;">
-                <button type="submit">QR-код</button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+<h3 class="text-xl font-medium mb-2">Список ивентов</h3>
+<table class="table-auto w-full bg-white shadow rounded">
+    <thead class="bg-gray-200 text-left">
+        <tr><th class="p-2">Название</th><th class="p-2">Named ID</th><th class="p-2">Дата</th><th class="p-2">Действия</th></tr>
+    </thead>
+    <tbody>
+    {% for event in events %}
+        <tr class="border-t">
+            <td class="p-2">{{ event.name }}</td>
+            <td class="p-2">{{ event.named_id }}</td>
+            <td class="p-2">{{ event.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="p-2 space-x-2">
+                <form method="post" action="/events/delete" class="inline">
+                    <input type="hidden" name="event_id" value="{{ event.id }}">
+                    <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Удалить</button>
+                </form>
+                <form method="get" action="/events/{{ event.id }}" class="inline">
+                    <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-blue-700">Редактировать</button>
+                </form>
+                <form method="get" action="/events/{{ event.id }}/qr" class="inline">
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700">QR-код</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
