@@ -39,12 +39,14 @@ services:
       - ./database:/app/database
       - ./migration:/app/migration
     ports:
-      - "8001:8001"
+      - "${TGBOT_PORT}:${TGBOT_PORT}"
     env_file:
       - ./.env
     depends_on:
       - postgres_db
       - migrate
+    networks:
+      - internal
 
   web_app:
     container_name: "web_app"
@@ -56,12 +58,18 @@ services:
       - ./database:/app/database
       - ./migration:/app/migration
     ports:
-      - "8000:8000"
+      - "${WEB_PORT}:${WEB_PORT}"
     env_file:
       - ./.env
     depends_on:
       - postgres_db
       - migrate
+    networks:
+      - internal
 
 volumes:
   pgdata:
+
+networks:
+  internal:
+    driver: bridge

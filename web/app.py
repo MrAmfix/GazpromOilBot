@@ -2,9 +2,8 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
-from database.config import BOT_USERNAME, WEB_HOST
-from routers import auth, admins, onboarding, events, message, analytics
+from database.config import BOT_USERNAME, WEB_HOST, WEB_PORT
+from routers import auth, admins, onboarding, events, message, analytics, files
 
 app = FastAPI()
 
@@ -17,6 +16,7 @@ app.include_router(onboarding.router)
 app.include_router(events.router)
 app.include_router(message.router)
 app.include_router(analytics.router)
+app.include_router(files.router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -40,4 +40,4 @@ async def dashboard(request: Request):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8000)
+    uvicorn.run(app, host='0.0.0.0', port=WEB_PORT)

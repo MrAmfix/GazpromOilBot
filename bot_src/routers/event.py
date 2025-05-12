@@ -1,14 +1,15 @@
 import mimetypes
-import os
 from pathlib import Path
 from aiogram import Router, F
 from aiogram.enums import ContentType
-from aiogram.filters import StateFilter, Command
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, FSInputFile, Message
+from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
+from bot_src.utils.download_file import download_file
 from bot_src.utils.keyboards import answer_options_keyboard
 from bot_src.utils.states import InEvent
+from database.config import WEB_PORT
 from database.crud.event_crud import EventCrud
 from database.crud.stage_crud import StageCrud
 from database.crud.user_crud import UserCrud
@@ -186,32 +187,36 @@ async def handle_text_answer(msg: Message, state: FSMContext, session: AsyncSess
 
 async def send_start_message(stage: StageGet, msg: Message):
     try:
-        if stage.start_sticket:
+        if stage.start_sticker:
             await msg.answer_sticker(stage.start_sticker)
     except Exception:
         pass
 
-    full_path = PROJECT_ROOT / (stage.start_attach or "")
+    filename = (stage.start_attach or "").replace("attachs/", "")
+    file_url = f"http://web_app:{WEB_PORT}/file/{filename}"
+    file = await download_file(file_url, "start")
 
-    if not os.path.isfile(full_path):
+    if not file:
         await msg.answer(stage.start_message, reply_markup=answer_options_keyboard(stage))
-    else:
-        mime_type, _ = mimetypes.guess_type(full_path)
-        try:
-            if mime_type and mime_type.startswith("image/"):
-                await msg.answer_photo(
-                    photo=FSInputFile(full_path),
-                    caption=stage.start_message,
-                    reply_markup=answer_options_keyboard(stage)
-                )
-            else:
-                await msg.answer_document(
-                    document=FSInputFile(full_path),
-                    caption=stage.start_message,
-                    reply_markup=answer_options_keyboard(stage)
-                )
-        except Exception:
-            await msg.answer(stage.start_message, reply_markup=answer_options_keyboard(stage))
+        return
+
+    mime_type, _ = mimetypes.guess_type(filename)
+    try:
+        if mime_type and mime_type.startswith("image/"):
+            await msg.answer_photo(
+                photo=file,
+                caption=stage.start_message,
+                reply_markup=answer_options_keyboard(stage)
+            )
+        else:
+            await msg.answer_document(
+                document=file,
+                caption=stage.start_message,
+                reply_markup=answer_options_keyboard(stage)
+            )
+    except Exception:
+        await msg.answer(stage.start_message, reply_markup=answer_options_keyboard(stage))
+
 
 
 async def send_end_message(stage: StageGet, msg: Message):
@@ -226,22 +231,25 @@ async def send_end_message(stage: StageGet, msg: Message):
     except Exception:
         pass
 
-    full_path = PROJECT_ROOT / (stage.end_attach or "")
+    filename = (stage.start_attach or "").replace("attachs/", "")
+    file_url = f"http://web_app:{WEB_PORT}/file/{filename}"
+    file = await download_file(file_url, "start")
 
-    if not os.path.isfile(full_path):
+    if not file:
         await msg.answer(stage.end_message)
-    else:
-        mime_type, _ = mimetypes.guess_type(full_path)
-        try:
-            if mime_type and mime_type.startswith("image/"):
-                await msg.answer_photo(
-                    photo=FSInputFile(full_path),
-                    caption=stage.end_message
-                )
-            else:
-                await msg.answer_document(
-                    document=FSInputFile(full_path),
-                    caption=stage.end_message
-                )
-        except Exception:
-            await msg.answer(stage.end_message)
+        return
+
+    mime_type, _ = mimetypes.guess_type(filename)
+    try:
+        if mime_type and mime_type.startswith("image/"):
+            await msg.answer_photo(
+                photo=file,
+                caption=stage.end_message
+            )
+        else:
+            await msg.answer_document(
+                document=file,
+                caption=stage.end_message
+            )
+    except Exception:
+        await msg.answer(stage.end_message)
