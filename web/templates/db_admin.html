@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Управление БД{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Выберите таблицу</h2>
+
+<ul class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    {% for table in tables %}
+        <li>
+            <a href="/db/{{ table }}" class="block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-center">
+                {{ table }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
