@@ -70,7 +70,7 @@ async def delete_record(
         return RedirectResponse("/dashboard")
 
     table = Base.metadata.tables.get(table_name)
-    if not table:
+    if table is None:
         raise HTTPException(status_code=404)
 
     pk_column = list(table.primary_key.columns)[0]
