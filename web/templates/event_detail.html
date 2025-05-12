@@ -1,53 +1,57 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ event.name }}</title>
-</head>
-<body>
-    <p><a href="/events">&larr; Назад к списку ивентов</a></p>
+{% extends "base.html" %}
+{% block title %}{{ event.name }}{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">{{ event.name }} ({{ event.named_id }})</h2>
 
-    {% if status == 'updated' %}<p style="color: green;">Ивент обновлён</p>{% endif %}
-    {% if status == 'stage_used' %}<p style="color: red;">Кажется, стейдж уже используется, удалить не получится</p>{% endif %}
-    {% if status == 'stage_added' %}<p style="color: green;">Стейдж добавлен</p>{% endif %}
-    {% if status == 'stage_deleted' %}<p style="color: green;">Стейдж удалён</p>{% endif %}
+{% if status %}
+    <div class="mb-4 text-sm {% if 'error' in status or 'used' in status %}text-red-600{% else %}text-green-600{% endif %}">
+        {% if status == 'updated' %}Ивент обновлён{% elif status == 'stage_used' %}Стейдж используется, удалить нельзя{% elif status == 'stage_added' %}Стейдж добавлен{% elif status == 'stage_deleted' %}Стейдж удалён{% endif %}
+    </div>
+{% endif %}
 
-    <h2>{{ event.name }} ({{ event.named_id }})</h2>
-    <form method="post" action="/events/{{ event.id }}/update">
-        <label>Название:</label><input name="name" value="{{ event.name }}" required><br>
-        <label>Стартовое сообщение:</label><textarea name="start_message">{{ event.start_message }}</textarea><br>
-        <label>Конечное сообщение:</label><textarea name="end_message">{{ event.end_message }}</textarea><br>
-        <label>ID стартового стикера:</label><input name="start_sticker" value="{{ event.start_sticker }}"><br>
-        <label>ID конечного стикера:</label><input name="end_sticker" value="{{ event.end_sticker }}"><br>
-        <small>Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" target="_blank">боту</a></small><br>
-        <button type="submit">Сохранить</button>
-    </form>
+<form method="post" action="/events/{{ event.id }}/update" class="space-y-2 mb-6">
+    <div><label>Название:</label><input name="name" value="{{ event.name }}" required class="input"></div>
+    <div><label>Стартовое сообщение:</label><textarea name="start_message" class="input">{{ event.start_message }}</textarea></div>
+    <div><label>Конечное сообщение:</label><textarea name="end_message" class="input">{{ event.end_message }}</textarea></div>
+    <div><label>ID стартового стикера:</label><input name="start_sticker" value="{{ event.start_sticker }}" class="input"></div>
+    <div><label>ID конечного стикера:</label><input name="end_sticker" value="{{ event.end_sticker }}" class="input"></div>
+    <small class="text-gray-500">Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" class="text-blue-500" target="_blank">боту</a></small><br>
+    <button type="submit" class="btn">Сохранить</button>
+</form>
 
-    <h3>Добавить стейдж</h3>
-    <form method="post" action="/events/{{ event.id }}/stages/add" enctype="multipart/form-data">
-        <label>Номер:</label><input type="number" name="event_number"><br>
-        <label>Сообщение:</label><textarea name="start_message"></textarea><br>
-        <label>При ошибке:</label><textarea name="mid_message"></textarea><br>
-        <label>Финальное:</label><textarea name="end_message"></textarea><br>
-        <label>Ожидаемый ответ:</label><input name="expected_answer"><br>
-        <label>Варианты (через ";"):</label><input name="answer_options"><br>
-        <label>Файл (начало):</label><input type="file" name="start_attach"><br>
-        <label>Файл (конец):</label><input type="file" name="end_attach"><br>
-        <label>Стикер в конце:</label><input name="end_sticker"><br>
-        <small>Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" target="_blank">боту</a></small><br>
-        <button type="submit">Добавить</button>
-    </form>
+<h3 class="text-xl font-medium mb-2">Добавить стейдж</h3>
+<form method="post" action="/events/{{ event.id }}/stages/add" enctype="multipart/form-data" class="space-y-2 mb-6">
+    <div><label>Номер:</label><input type="number" name="event_number" class="input"></div>
+    <div><label>Сообщение:</label><textarea name="start_message" class="input"></textarea></div>
+    <div><label>При ошибке:</label><textarea name="mid_message" class="input"></textarea></div>
+    <div><label>Финальное:</label><textarea name="end_message" class="input"></textarea></div>
+    <div><label>Ожидаемый ответ:</label><input name="expected_answer" class="input"></div>
+    <div><label>Варианты (через ";"):</label><input name="answer_options" class="input"></div>
+    <div><label>Файл (начало):</label><input type="file" name="start_attach" class="input"></div>
+    <div><label>Файл (конец):</label><input type="file" name="end_attach" class="input"></div>
+    <div><label>Стикер в конце:</label><input name="end_sticker" class="input"></div>
+    <button type="submit" class="btn">Добавить</button>
+</form>
 
-    <h3>Стейджи</h3>
-    <ul>
-        {% for stage in stages %}
-        <li>
-            {{ stage.event_number }} — {{ stage.start_message }} — {{ stage.end_message }}
-            <form method="post" action="/stages/{{ stage.id }}/delete" style="display:inline;">
-                <input type="hidden" name="event_id" value="{{ event.id }}">
-                <button type="submit">Удалить</button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+<h3 class="text-xl font-medium mb-2">Стейджи</h3>
+<table class="table-auto w-full bg-white shadow rounded">
+    <thead class="bg-gray-200 text-left">
+        <tr><th class="p-2">#</th><th class="p-2">Старт</th><th class="p-2">Конец</th><th class="p-2">Действия</th></tr>
+    </thead>
+    <tbody>
+    {% for stage in stages %}
+        <tr class="border-t">
+            <td class="p-2">{{ stage.event_number }}</td>
+            <td class="p-2">{{ stage.start_message }}</td>
+            <td class="p-2">{{ stage.end_message }}</td>
+            <td class="p-2">
+                <form method="post" action="/stages/{{ stage.id }}/delete" class="inline">
+                    <input type="hidden" name="event_id" value="{{ event.id }}">
+                    <button type="submit" class="text-red-600 hover:underline">Удалить</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

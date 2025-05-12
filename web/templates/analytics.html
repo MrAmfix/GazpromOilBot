@@ -1,32 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Аналитика</title>
-</head>
-<body>
-    <p><a href="/dashboard">&larr; Назад в Dashboard</a></p>
+{% extends "base.html" %}
+{% block title %}Аналитика{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Аналитика по ивенту</h2>
 
-    <h2>Аналитика по ивенту</h2>
-    <form method="post" action="/analytics/event">
+<form method="post" action="/analytics/event" class="space-y-2 mb-6">
+    <div>
         <label>Named ID ивента:</label><br>
-        <input type="text" name="named_id" id="named_id_field" required><br>
-        <button type="submit">Скачать Excel</button>
-    </form>
+        <input type="text" name="named_id" id="named_id_field" required class="input">
+    </div>
+    <button type="submit" class="btn">Скачать Excel</button>
+</form>
 
-    <h3>Список ивентов</h3>
-    <ul>
-        {% for event in events %}
-            <li>
-                {{ event.name }} ({{ event.named_id }}) — {{ event.created_at.strftime('%Y-%m-%d %H:%M') }}
-                <button onclick="document.getElementById('named_id_field').value='{{ event.named_id }}'">Получить статистику</button>
-            </li>
-        {% endfor %}
-    </ul>
+<h3 class="text-xl font-medium mb-2">Список ивентов</h3>
+<table class="table-auto w-full bg-white shadow rounded mb-6">
+    <thead class="bg-gray-200 text-left">
+        <tr><th class="p-2">Название</th><th class="p-2">Named ID</th><th class="p-2">Дата</th><th class="p-2">Действие</th></tr>
+    </thead>
+    <tbody>
+    {% for event in events %}
+        <tr class="border-t">
+            <td class="p-2">{{ event.name }}</td>
+            <td class="p-2">{{ event.named_id }}</td>
+            <td class="p-2">{{ event.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td class="p-2">
+                <button onclick="document.getElementById('named_id_field').value='{{ event.named_id }}'" class="text-blue-600 hover:underline">
+                    Получить статистику
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
 
-    <hr>
-    <h2>Аналитика всех пользователей</h2>
-    <form method="get" action="/analytics/users">
-        <button type="submit">Скачать Excel</button>
-    </form>
-</body>
-</html>
+<hr class="my-6">
+<h2 class="text-2xl font-semibold mb-4">Аналитика всех пользователей</h2>
+<form method="get" action="/analytics/users">
+    <button type="submit" class="btn">Скачать Excel</button>
+</form>
+{% endblock %}

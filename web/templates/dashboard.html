@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard</title>
-</head>
-<body>
-    <h2>Добро пожаловать, {{ username }}</h2>
-    <ul>
-        <li><a href="/admins">Управление админами</a></li>
-        <li><a href="/events">Управление ивентами и стейджами</a></li>
-        <li><a href="/onboarding">Управление начальным сообщением</a></li>
-        <li><a href="/message">Рассылка</a></li>
-        <li><a href="/analytics">Аналитика</a></li>
-    </ul>
-</body>
-</html>
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">Добро пожаловать, {{ username }}</h2>
+<p class="text-gray-600">Выберите раздел слева в меню</p>
+{% endblock %}
