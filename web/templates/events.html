@@ -17,7 +17,7 @@
     <div><label>ID стартового стикера:</label><input type="text" name="start_sticker" class="input"></div>
     <div><label>ID конечного стикера:</label><input type="text" name="end_sticker" class="input"></div>
     <small class="text-gray-500">Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" class="text-blue-500" target="_blank">боту</a></small><br>
-    <button type="submit" class="btn">Создать</button>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Создать</button>
 </form>
 
 <h3 class="text-xl font-medium mb-2">Список ивентов</h3>
@@ -34,13 +34,13 @@
             <td class="p-2 space-x-2">
                 <form method="post" action="/events/delete" class="inline">
                     <input type="hidden" name="event_id" value="{{ event.id }}">
-                    <button type="submit" class="text-red-600 hover:underline">Удалить</button>
+                    <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Удалить</button>
                 </form>
                 <form method="get" action="/events/{{ event.id }}" class="inline">
-                    <button type="submit" class="text-blue-600 hover:underline">Редактировать</button>
+                    <button type="submit" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-blue-700">Редактировать</button>
                 </form>
                 <form method="get" action="/events/{{ event.id }}/qr" class="inline">
-                    <button type="submit" class="text-green-600 hover:underline">QR-код</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-blue-700">QR-код</button>
                 </form>
             </td>
         </tr>

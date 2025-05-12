@@ -8,7 +8,7 @@
         <label>Named ID ивента:</label><br>
         <input type="text" name="named_id" id="named_id_field" required class="input">
     </div>
-    <button type="submit" class="btn">Скачать Excel</button>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Скачать Excel</button>
 </form>
 
 <h3 class="text-xl font-medium mb-2">Список ивентов</h3>
@@ -23,7 +23,7 @@
             <td class="p-2">{{ event.named_id }}</td>
             <td class="p-2">{{ event.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
             <td class="p-2">
-                <button onclick="document.getElementById('named_id_field').value='{{ event.named_id }}'" class="text-blue-600 hover:underline">
+                <button onclick="document.getElementById('named_id_field').value='{{ event.named_id }}'" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                     Получить статистику
                 </button>
             </td>
@@ -35,6 +35,6 @@
 <hr class="my-6">
 <h2 class="text-2xl font-semibold mb-4">Аналитика всех пользователей</h2>
 <form method="get" action="/analytics/users">
-    <button type="submit" class="btn">Скачать Excel</button>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Скачать Excel</button>
 </form>
 {% endblock %}

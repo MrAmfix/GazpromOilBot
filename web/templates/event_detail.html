@@ -16,7 +16,7 @@
     <div><label>ID стартового стикера:</label><input name="start_sticker" value="{{ event.start_sticker }}" class="input"></div>
     <div><label>ID конечного стикера:</label><input name="end_sticker" value="{{ event.end_sticker }}" class="input"></div>
     <small class="text-gray-500">Для получения ID отправьте стикер <a href="https://t.me/{{ bot_username }}" class="text-blue-500" target="_blank">боту</a></small><br>
-    <button type="submit" class="btn">Сохранить</button>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Сохранить</button>
 </form>
 
 <h3 class="text-xl font-medium mb-2">Добавить стейдж</h3>
@@ -30,7 +30,7 @@
     <div><label>Файл (начало):</label><input type="file" name="start_attach" class="input"></div>
     <div><label>Файл (конец):</label><input type="file" name="end_attach" class="input"></div>
     <div><label>Стикер в конце:</label><input name="end_sticker" class="input"></div>
-    <button type="submit" class="btn">Добавить</button>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Добавить</button>
 </form>
 
 <h3 class="text-xl font-medium mb-2">Стейджи</h3>
@@ -47,7 +47,7 @@
             <td class="p-2">
                 <form method="post" action="/stages/{{ stage.id }}/delete" class="inline">
                     <input type="hidden" name="event_id" value="{{ event.id }}">
-                    <button type="submit" class="text-red-600 hover:underline">Удалить</button>
+                    <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Удалить</button>
                 </form>
             </td>
         </tr>
