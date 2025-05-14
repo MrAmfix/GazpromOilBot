@@ -93,3 +93,62 @@ fix_event_number_on_delete_trigger = {
     ]
 }
 
+fix_event_number_on_update_trigger = {
+    "upgrade": [
+        """
+        CREATE OR REPLACE FUNCTION fix_event_number_on_update()
+        RETURNS TRIGGER AS $$
+        DECLARE
+            max_num INTEGER;
+        BEGIN
+            SELECT COALESCE(MAX(event_number), 0) INTO max_num
+            FROM stages
+            WHERE event_id = NEW.event_id AND id != OLD.id;
+
+            IF NEW.event_number < 1 THEN
+                NEW.event_number := 1;
+            ELSIF NEW.event_number > max_num THEN
+                NEW.event_number := max_num;
+            END IF;
+
+            IF NEW.event_number = OLD.event_number THEN
+                RETURN NEW;
+            END IF;
+            
+            PERFORM set_config('session_replication_role', 'replica', true);
+
+            IF NEW.event_number > OLD.event_number THEN
+                UPDATE stages
+                SET event_number = event_number - 1
+                WHERE event_id = NEW.event_id
+                  AND event_number > OLD.event_number
+                  AND event_number <= NEW.event_number;
+
+            ELSIF NEW.event_number < OLD.event_number THEN
+                UPDATE stages
+                SET event_number = event_number + 1
+                WHERE event_id = NEW.event_id
+                  AND event_number >= NEW.event_number
+                  AND event_number < OLD.event_number;
+            END IF;
+            
+            PERFORM set_config('session_replication_role', 'origin', true);
+
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+        """,
+        """
+        CREATE TRIGGER trigger_fix_event_number_on_update
+        BEFORE UPDATE ON stages
+        FOR EACH ROW
+        EXECUTE FUNCTION fix_event_number_on_update();
+        """
+    ],
+    "downgrade": [
+        """DROP TRIGGER IF EXISTS trigger_fix_event_number_on_update ON stages;""",
+        """DROP FUNCTION IF EXISTS fix_event_number_on_update;"""
+    ]
+}
+
+

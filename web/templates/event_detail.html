@@ -5,7 +5,7 @@
 
 {% if status %}
     <div class="mb-4 text-sm {% if 'error' in status or 'used' in status %}text-red-600{% else %}text-green-600{% endif %}">
-        {% if status == 'updated' %}Ивент обновлён{% elif status == 'stage_used' %}Стейдж используется, удалить нельзя{% elif status == 'stage_added' %}Стейдж добавлен{% elif status == 'stage_deleted' %}Стейдж удалён{% endif %}
+        {% if status == 'updated' %}Ивент обновлён{% elif status == 'stage_used' %}Стейдж используется, удалить нельзя{% elif status == 'stage_added' %}Стейдж добавлен{% elif status == 'stage_deleted' %}Стейдж удалён{% elif status == 'stage_edited' %}Стейдж обновлён{% endif %}
     </div>
 {% endif %}
 
@@ -45,6 +45,22 @@
             <td class="p-2">{{ stage.start_message }}</td>
             <td class="p-2">{{ stage.end_message }}</td>
             <td class="p-2">
+                <details>
+                    <summary class="text-orange-600 cursor-pointer">Редактировать</summary>
+                    <form method="post" action="/stages/{{ stage.id }}/edit" enctype="multipart/form-data" class="space-y-2 mt-2">
+                        <input type="hidden" name="event_id" value="{{ event.id }}">
+                        <div><label>Номер:</label><input type="number" name="event_number" class="input" value="{{ stage.event_number }}"></div>
+                        <div><label>Сообщение:</label><textarea name="start_message" class="input">{{ stage.start_message }}</textarea></div>
+                        <div><label>При ошибке:</label><textarea name="mid_message" class="input">{{ stage.mid_message }}</textarea></div>
+                        <div><label>Финальное:</label><textarea name="end_message" class="input">{{ stage.end_message }}</textarea></div>
+                        <div><label>Ожидаемый ответ:</label><input name="expected_answer" class="input" value="{{ stage.expected_answer }}"></div>
+                        <div><label>Варианты (через ";"):</label><input name="answer_options" class="input" value="{{ stage.answer_options }}"></div>
+                        <div><label>Файл (начало):</label><input type="file" name="start_attach" class="input"></div>
+                        <div><label>Файл (конец):</label><input type="file" name="end_attach" class="input"></div>
+                        <div><label>Стикер в конце:</label><input name="end_sticker" class="input" value="{{ stage.end_sticker }}"></div>
+                        <button type="submit" class="px-3 py-1 bg-orange-500 text-white rounded hover:bg-orange-600 text-sm">Сохранить</button>
+                    </form>
+                </details>
                 <form method="post" action="/stages/{{ stage.id }}/delete" class="inline">
                     <input type="hidden" name="event_id" value="{{ event.id }}">
                     <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">Удалить</button>

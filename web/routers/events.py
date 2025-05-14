@@ -188,3 +188,50 @@ async def delete_stage(stage_id: str, event_id: str = Form(...), session: AsyncS
         return RedirectResponse(f"/events/{event_id}?status=stage_deleted", status_code=303)
     except Exception:
         return RedirectResponse(f"/events/{event_id}?status=stage_used", status_code=303)
+
+
+@router.post("/stages/{stage_id}/edit")
+async def edit_stage(
+    stage_id: str,
+    event_id: str = Form(...),
+    event_number: int = Form(None),
+    start_message: str = Form(None),
+    mid_message: str = Form(None),
+    end_message: str = Form(None),
+    expected_answer: str = Form(None),
+    answer_options: str = Form(None),
+    end_sticker: str = Form(None),
+    start_attach: UploadFile = Form(None),
+    end_attach: UploadFile = Form(None),
+    session: AsyncSession = Depends(get_session)
+):
+    def save_file(file: UploadFile, suffix: str):
+        if not file:
+            return None
+        ext = file.filename.split(".")[-1]
+        filename = f"{uuid.uuid4()}_{suffix}.{ext}"
+        filepath = os.path.join(ATTACH_DIR, filename)
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, "wb") as f:
+            f.write(file.file.read())
+        return f"attachs/{filename}"
+
+    start_path = save_file(start_attach, "start")
+    end_path = save_file(end_attach, "end")
+
+    await StageCrud.update(
+        session=session,
+        record_id=stage_id,
+        event_number=event_number,
+        start_message=start_message,
+        mid_message=mid_message,
+        end_message=end_message,
+        expected_answer=expected_answer,
+        answer_options=answer_options,
+        end_sticker=end_sticker,
+        start_attach=start_path,
+        end_attach=end_path,
+    )
+
+    return RedirectResponse(f"/events/{event_id}?status=stage_edited", status_code=303)
+
