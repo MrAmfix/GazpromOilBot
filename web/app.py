@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from database.config import BOT_USERNAME, WEB_HOST, WEB_PORT
-from routers import auth, admins, onboarding, events, message, analytics, files
+from routers import auth, admins, onboarding, events, message, analytics, files, db_admin
 
 app = FastAPI()
 
@@ -17,6 +17,7 @@ app.include_router(events.router)
 app.include_router(message.router)
 app.include_router(analytics.router)
 app.include_router(files.router)
+app.include_router(db_admin.router)
 
 
 @app.get("/", response_class=HTMLResponse)
